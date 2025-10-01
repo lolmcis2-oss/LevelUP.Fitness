@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LevelUp Fitness</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* Hintergrund auf Schwarz */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        /* Hintergrundmuster für mehr Tiefe */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff0000' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            /* Navigation Hintergrund auf Schwarz */
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 5%;
+            z-index: 1000;
+            /* Randfarbe auf Rot */
+            border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            font-size: 1.1rem;
+        }
+
+        nav a:hover {
+            /* Akzentfarbe Rot */
+            color: #ff0000;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Hintergrund auf Schwarz */
+            background: #000000;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        /* Dekorative Elemente (hero::before und hero::after) wurden entfernt, um das "Abgeschnitten"-Problem zu beheben */
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            /* Textgröße auf ursprünglichen Wert (Originalversion) zurückgesetzt */
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            margin-bottom: 1rem;
+            /* Akzentfarbe Rot */
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            /* Textgröße auf ursprünglichen Wert (Originalversion) zurückgesetzt */
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: 2rem;
+            color: #bbb;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            /* Akzentfarbe Rot */
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            /* Akzentfarbe Rot */
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            transition: all 0.4s ease-in-out;
+            z-index: -1;
+        }
+        
+        .cta-button:hover::before {
+            width: 100%;
+        }
+        
+        /* Stil für die Buttons in den Paket-Karten */
+        .package-card .cta-button {
+            margin-top: auto;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            /* Akzentfarbe Rot */
+            box-shadow: 0 15px 40px rgba(255, 0, 0, 0.5);
+        }
+
+        section {
+            padding: 5rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Visuelle Trennung zwischen Sektionen */
+        section::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.3), transparent);
+        }
+
+        h2 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 3rem;
+            text-align: center;
+            /* Akzentfarbe Rot */
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .packages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .package-card {
+            /* Hintergrund auf Dunkelgrau */
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            /* Akzentfarbe Rot */
+            border: 2px solid rgba(255, 0, 0, 0.2);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .package-card:hover {
+            transform: translateY(-10px);
+            /* Akzentfarbe Rot */
+            border-color: #ff0000;
+            /* Akzentfarbe Rot */
+            box-shadow: 0 20px 40px rgba(255, 0, 0, 0.3);
+        }
+
+        .package-card h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            /* Akzentfarbe Rot */
+            color: #ff0000;
+        }
+
+        .package-card .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            /* Akzentfarbe Dunkelrot */
+            color: #cc0000;
+        }
+
+        /* Stil für die neuen Listen */
+        .package-card ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 1.5rem;
+        }
+
+        .package-card ul li {
+            padding: 0.5rem 0;
+            /* Gestrichelte Linien entfernt */
+            color: #ddd;
+            font-size: 1rem;
+        }
+
+        .package-card ul li::before {
+            content: "✓";
+            /* Akzentfarbe Rot */
+            color: #ff0000; 
+            font-weight: bold;
+            display: inline-block;
+            width: 1.5em;
+            margin-left: -1.5em;
+        }
+        /* Ende Listen Stil */
+
+        /* Mobile Optimierung */
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 1.5rem;
+                justify-content: space-around;
+            }
+            
+            nav a {
+                font-size: 0.9rem;
+            }
+            
+            .hero h1 {
+                font-size: clamp(2rem, 6vw, 3rem);
+            }
+            
+            .hero p {
+                font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            }
+            
+            .package-card {
+                padding: 1.5rem;
+            }
+            
+            .package-card h3 {
+                font-size: 1.5rem;
+            }
+            
+            .package-card .price {
+                font-size: 2rem;
+            }
+            
+            .modal-content {
+                padding: 2rem;
+                margin: 10% auto;
+                width: 95%;
+            }
+            
+            .cta-button {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            nav {
+                padding: 1rem 5%;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+            
+            section {
+                padding: 3rem 5%;
+            }
+            
+            .hero {
+                min-height: 80vh;
+            }
+            
+            .packages {
+                grid-template-columns: 1fr;
+            }
+            
+            .testimonials {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .about {
+            /* Hintergrund auf Dunkelgrau */
+            background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%);
+            border-radius: 20px;
+            padding: 4rem 3rem;
+        }
+
+        .about p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            /* Hintergrund auf Dunkelgrau */
+            background: #0a0a0a;
+            padding: 2rem;
+            border-radius: 15px;
+            /* Akzentfarbe Rot */
+            border-left: 4px solid #ff0000;
+        }
+
+        .testimonial-card p {
+            font-style: italic;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+
+        .testimonial-card .author {
+            /* Akzentfarbe Rot */
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .contact {
+            text-align: center;
+            /* Akzentfarbe Rot */
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            padding: 4rem 2rem;
+            border-radius: 20px;
+        }
+
+        .contact h2 {
+            color: white;
+            -webkit-text-fill-color: white;
+        }
+
+        .contact p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: white;
+            /* Akzentfarbe Rot */
+            color: #ff0000;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .contact-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: #000000;
+            color: #666;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-content {
+            /* Hintergrund auf Dunkelgrau */
+            background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
+            margin: 5% auto;
+            padding: 3rem;
+            /* Akzentfarbe Rot */
+            border: 2px solid #ff0000;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            /* Akzentfarbe Rot */
+            color: #ff0000;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .modal-buttons a {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem 2rem;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            /* Akzentfarbe Rot */
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            /* Akzentfarbe Rot */
+            color: #ff0000;
+            /* Akzentfarbe Rot */
+            border: 2px solid #ff0000;
+        }
+        
+        /* FAQ Styles */
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .faq-item:hover {
+            border-color: rgba(255, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-question h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #fff;
+        }
+        
+        .faq-toggle {
+            color: #ff0000;
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-answer p {
+            padding-bottom: 1.5rem;
+            color: #ccc;
+        }
+        
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+        
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+        }
+        
+        /* Zeitlich begrenzte Angebote */
+        .limited-offer {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .limited-offer::before {
+            content: "Begrenzte Zeit!";
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            background: #ff0000;
+            color: white;
+            padding: 5px 40px;
+            font-size: 0.8rem;
+            transform: rotate(45deg);
+            z-index: 2;
+        }
+        
+        /* Interaktive Tools Styles */
+        .interactive-tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .tool-container {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        
+        .tool-container:hover {
+            border-color: #ff0000;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2);
+        }
+        
+        .tool-container h3 {
+            color: #ff0000;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .tool-container p {
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ddd;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+        }
+        
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border-left: 3px solid #ff0000;
+            display: none;
+        }
+        
+        .result-box.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* 1RM Rechner spezifische Stile */
+        #rm-percentages {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        
+        #rm-percentages li {
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed rgba(255, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        #rm-percentages li:last-child {
+            border-bottom: none;
+        }
+        
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ff0000' d='M6 8.825L1.175 4 2.05 3.125 6 7.075 9.95 3.125 10.825 4 6 8.825z'/%3E%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .quiz-question {
+            margin-bottom: 1.5rem;
+        }
+        
+        .quiz-question h4 {
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .quiz-options label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        
+        .quiz-options label:hover {
+            background: rgba(255, 0, 0, 0.1);
+        }
+        
+        .quiz-options input {
+            margin-right: 10px;
+        }
+        
+        #quiz-result {
+            text-align: center;
+        }
+        
+        #quiz-result h4 {
+            color: #ff0000;
+            margin-bottom: 1rem;
+        }
+        
+        #recommended-plan {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        #plan-link {
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        
+        /* Mobile Anpassungen für interaktive Tools */
+        @media (max-width: 768px) {
+            .interactive-tools {
+                grid-template-columns: 1fr;
+            }
+            
+            .tool-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#angebote">Angebote</a></li>
+            <li><a href="#uber-mich">Über mich</a></li>
+            <li><a href="#erfolge">Erfolge</a></li>
+            <li><a href="#kontakt">Kontakt</a></li>
+        </ul>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Erreiche deine Ziele</h1>
+            <p>Professionelles Krafttraining & Ernährungscoaching</p>
+            <a href="#angebote" class="cta-button">Jetzt starten</a>
+        </div>
+    </section>
+
+    <section id="angebote">
+        <h2>Meine Angebote</h2>
+        <div class="packages">
+            <div class="package-card">
+                <h3>2-Day Split</h3>
+                <div class="price">29.90 CHF</div>
+                <p>Perfekt für Einsteiger</p>
+                <ul>
+                    <li>2 Trainingseinheiten pro Woche</li>
+                    <li>Ganzkörper-Training optimiert</li>
+                    <li>Individueller 12-Wochen Plan</li>
+                    <li>Persönliche Betreuung</li>
+                    <li>Ernährungstipps</li>
+                    </ul>
+                <a href="#" class="cta-button" onclick="showDetails('2day'); return false;">Auswählen</a>
+            </div>
+            <div class="package-card">
+                <h3>3-Day Split</h3>
+                <div class="price">29.90 CHF</div>
+                <p>Optimal für Fortgeschrittene</p>
+                <ul>
+                    <li>3 Trainingseinheiten pro Woche</li>
+                    <li>Push/Pull/Legs Split</li>
+                    <li>Individueller 12-Wochen Plan</li>
+                    <li>Persönliche Betreuung</li>
+                    <li>Ernährungstipps</li>
+                </ul>
+                <a href="#" class="cta-button" onclick="showDetails('3day'); return false;">Auswählen</a>
+            </div>
+            <div class="package-card">
+                <h3>4-Day Split</h3>
+                <div class="price">29.90 CHF</div>
+                <p>Maximaler Muskelaufbau</p>
+                <ul>
+                    <li>4 Trainingseinheiten pro Woche</li>
+                    <li>Upper/Lower/Push/Pull Split</li>
+                    <li>Individueller 12-Wochen Plan</li>
+                    <li>Persönliche Betreuung</li>
+                    <li>Ernährungsplan</li>
+                    <li>Progressions-Tracking</li>
+                </ul>
+                <a href="#" class="cta-button" onclick="showDetails('4day'); return false;">Auswählen</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="uber-mich">
+        <h2>Über mich</h2>
+        <div class="about">
+            <p>Seit 3 Jahren lebe ich meine Leidenschaft für Krafttraining und habe in dieser Zeit nicht nur selbst bedeutende Fortschritte gemacht, sondern auch intensiv Wissen und praktische Erfahrung gesammelt. Was als persönliche Reise begann, entwickelte sich zu einer tiefen Auseinandersetzung mit allem, was effektives Training und richtige Ernährung ausmacht.</p>
+            <p>Mein Wissen stammt nicht nur aus Büchern und Online-Quellen, sondern vor allem aus dem direkten Austausch mit Menschen, die wirklich Ahnung haben: Bodybuilder, die jahrelange Wettkampferfahrung mitbringen, zertifizierte Ernährungs- und Sportberater sowie erfahrene Coaches, die ihr Handwerk verstehen. Diese Gespräche und der kontinuierliche Wissensaustausch haben mir geholfen, die Theorie mit der Praxis zu verbinden und zu verstehen, was im echten Training wirklich funktioniert.</p>
+            <p>Dabei habe ich gelernt, dass viele Menschen mit falschen Informationen und ineffektiven Methoden kämpfen. Veraltete Trainingstipps, Mythen über Ernährung und schlechte Gewohnheiten halten viele davon ab, ihr volles Potenzial auszuschöpfen. Genau hier setze ich an: Mein Ziel ist es, Menschen zu unterstützen, die bereit sind, alte Gewohnheiten zu durchbrechen und sich von Fehlinformationen zu lösen.</p>
+            <p>Ich möchte dich auf dem richtigen Weg begleiten – mit bewährten Methoden, individueller Betreuung und dem Wissen, das wirklich Ergebnisse bringt. Egal ob du gerade erst anfängst oder bereits Erfahrung hast: Gemeinsam erreichen wir deine Fitnessziele nachhaltig, gesund und ohne unnötige Umwege.</p>
+        </div>
+    </section>
+
+    <section id="erfolge">
+        <h2>Erfolgsgeschichten</h2>
+        <div class="testimonials">
+            <div class="testimonial-card">
+                <p>"In 12 Wochen habe ich 8kg zugenommen."</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="interaktiv">
+        <h2>Interaktive Tools</h2>
+        <div class="interactive-tools">
+            <div class="tool-container">
+                <h3>1RM-Rechner</h3>
+                <p>Berechne dein maximales Gewicht für eine Wiederholung (One-Rep-Max) für jede Übung.</p>
+                <div class="rm-calculator">
+                    <div class="input-group">
+                        <label for="exercise">Übung:</label>
+                        <select id="exercise">
+                            <option value="bench">Bankdrücken</option>
+                            <option value="squat">Kniebeuge</option>
+                            <option value="deadlift">Kreuzheben</option>
+                            <option value="overhead">Schulterdrücken</option>
+                            <option value="other">Andere Übung</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="weight-lifted">Gehobenes Gewicht (kg):</label>
+                        <input type="number" id="weight-lifted" min="1" max="500" step="0.5" placeholder="z.B. 80">
+                    </div>
+                    <div class="input-group">
+                        <label for="reps">Anzahl der Wiederholungen:</label>
+                        <input type="number" id="reps" min="1" max="20" step="1" placeholder="z.B. 8">
+                    </div>
+                    <button id="calculate-1rm" class="cta-button">1RM berechnen</button>
+                    <div id="rm-result" class="result-box">
+                        <p>Dein geschätztes 1RM: <span id="rm-value">-</span> kg</p>
+                        <p id="rm-percentage">Prozentsätze für Trainingszwecke:</p>
+                        <ul id="rm-percentages">
+                            <li>90% - <span id="rm-90">-</span> kg (3-4 Wiederholungen)</li>
+                            <li>85% - <span id="rm-85">-</span> kg (5-6 Wiederholungen)</li>
+                            <li>75% - <span id="rm-75">-</span> kg (8-10 Wiederholungen)</li>
+                            <li>65% - <span id="rm-65">-</span> kg (12-15 Wiederholungen)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tool-container">
+                <h3>Welcher Plan passt zu mir?</h3>
+                <p>Beantworte ein paar kurze Fragen, um den optimalen Trainingsplan für dich zu finden.</p>
+                <div class="plan-quiz">
+                    <div id="quiz-container">
+                        <div class="quiz-question" id="question-1">
+                            <h4>Wie viel Trainingserfahrung hast du?</h4>
+                            <div class="quiz-options">
+                                <label><input type="radio" name="experience" value="beginner"> Anfänger (0-1 Jahr)</label>
+                                <label><input type="radio" name="experience" value="intermediate"> Fortgeschritten (1-3 Jahre)</label>
+                                <label><input type="radio" name="experience" value="advanced"> Erfahren (3+ Jahre)</label>
+                            </div>
+                        </div>
+                        <div class="quiz-question" id="question-2">
+                            <h4>Wie viele Tage pro Woche kannst du trainieren?</h4>
+                            <div class="quiz-options">
+                                <label><input type="radio" name="days" value="2"> 2 Tage</label>
+                                <label><input type="radio" name="days" value="3"> 3 Tage</label>
+                                <label><input type="radio" name="days" value="4"> 4+ Tage</label>
+                            </div>
+                        </div>
+                        <div class="quiz-question" id="question-3">
+                            <h4>Was ist dein primäres Ziel?</h4>
+                            <div class="quiz-options">
+                                <label><input type="radio" name="goal" value="strength"> Kraft aufbauen</label>
+                                <label><input type="radio" name="goal" value="muscle"> Muskeln aufbauen</label>
+                                <label><input type="radio" name="goal" value="fat"> Fett verlieren</label>
+                                <label><input type="radio" name="goal" value="health"> Allgemeine Fitness verbessern</label>
+                            </div>
+                        </div>
+                        <button id="quiz-submit" class="cta-button">Ergebnis anzeigen</button>
+                    </div>
+                    <div id="quiz-result" class="result-box">
+                        <h4>Dein empfohlener Plan:</h4>
+                        <p id="recommended-plan"></p>
+                        <p id="plan-description"></p>
+                        <a id="plan-link" href="#" class="cta-button">Zum empfohlenen Plan</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq">
+        <h2>Häufig gestellte Fragen</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Wie lange dauert es, bis ich Ergebnisse sehe?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Die ersten Ergebnisse sind in der Regel nach 3-4 Wochen sichtbar, wenn du konsequent trainierst und die Ernährungsempfehlungen befolgst. Signifikante Veränderungen zeigen sich nach 8-12 Wochen.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Benötige ich Vorerfahrung im Krafttraining?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Nein, meine Trainingspläne sind für alle Erfahrungsstufen geeignet. Für Anfänger empfehle ich den 2-Day Split, der speziell auf den Einstieg ins Krafttraining ausgerichtet ist.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Wie werden die Trainingspläne angepasst?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Nach dem Kauf erhältst du einen Fragebogen zu deinen Zielen, deiner Trainingserfahrung und eventuellen gesundheitlichen Einschränkungen. Auf dieser Basis erstelle ich deinen individuellen Plan.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h3>Kann ich den Plan auch im Fitnessstudio umsetzen?</h3>
+                    <span class="faq-toggle">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Ja, alle Trainingspläne sind sowohl für das Training zu Hause als auch im Fitnessstudio konzipiert. Bei der Erstellung berücksichtige ich die dir zur Verfügung stehende Ausrüstung.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="kontakt">
+        <div class="contact">
+            <h2>Bereit durchzustarten?</h2>
+            <a href="mailto:robin.smolarz@icloud.com" class="contact-button">Jetzt Kontakt aufnehmen</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 LevelUp Fitness</p>
+    </footer>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const planDetails = {
+            '2day': { 
+                title: '2-Day Split', 
+                price: '29.90 CHF', 
+                description: 'Einsteigerplan',
+                fullDescription: `
+                    <h3>✅ Beschreibung:</h3>
+                    <p>Der 2-Day Split ist ideal für Anfänger oder Personen mit begrenztem Zeitbudget. Mit nur zwei Trainingseinheiten pro Woche wird der gesamte Körper effektiv beansprucht. Der Fokus liegt auf ganzheitlicher Fitness, sauberer Technik und dem Aufbau einer stabilen Trainingsroutine.</p>
+                    
+                    <h3>📌 Enthaltene Leistungen:</h3>
+                    <ul>
+                        <li>2 Trainingseinheiten pro Woche: Ideal für Anfänger oder Vielbeschäftigte.</li>
+                        <li>Ganzkörper-Training optimiert: Jede Einheit deckt den gesamten Körper ab, was für Anfänger sehr effektiv ist.</li>
+                        <li>Individueller 12-Wochen-Plan: Maßgeschneiderter Plan basierend auf deinem Ziel und Fitnesslevel.</li>
+                        <li>Persönliche Betreuung: Regelmäßige Überprüfung deines Fortschritts.</li>
+                        <li>Ernährungstipps: Grundlegende Ernährungsempfehlungen für dein Ziel.</li>
+                    </ul>
+                    
+                    <h3>🎯 Zielgruppe:</h3>
+                    <ul>
+                        <li>Anfänger im Krafttraining</li>
+                        <li>Personen mit wenig Zeit</li>
+                        <li>Menschen, die eine einfache und effektive Einführung ins Training suchen</li>
+                    </ul>
+                `
+            },
+            '3day': { 
+                title: '3-Day Split', 
+                price: '29.90 CHF', 
+                description: 'Fortgeschrittenenplan',
+                fullDescription: `
+                    <h3>✅ Beschreibung:</h3>
+                    <p>Der 3-Day Split ist für diejenigen gedacht, die bereits Trainingserfahrung haben und gezielter an ihrer Muskulatur arbeiten möchten. Mit dem klassischen Push/Pull/Legs-System werden Muskelgruppen getrennt trainiert, was eine intensivere Belastung pro Bereich ermöglicht.</p>
+                    
+                    <h3>📌 Enthaltene Leistungen:</h3>
+                    <ul>
+                        <li>3 Trainingseinheiten pro Woche: Gute Balance zwischen Belastung und Regeneration.</li>
+                        <li>Push/Pull/Legs Split: Effektive Struktur zur gezielten Muskelentwicklung.</li>
+                        <li>Individueller 12-Wochen-Plan: Anpassung an dein Leistungsniveau und deine Ziele.</li>
+                        <li>Persönliche Betreuung: Regelmäßige Überprüfung deines Fortschritts.</li>
+                        <li>Ernährungstipps: Ausführliche Ernährungsempfehlungen für dein Ziel.</li>
+                    </ul>
+                    
+                    <h3>🎯 Zielgruppe:</h3>
+                    <ul>
+                        <li>Fortgeschrittene Athleten</li>
+                        <li>Trainierende mit 3 Tagen Zeit pro Woche</li>
+                        <li>Personen, die mehr Struktur und Abwechslung im Training wollen</li>
+                    </ul>
+                `
+            },
+            '4day': { 
+                title: '4-Day Split', 
+                price: '29.90 CHF', 
+                description: 'Maximaler Muskelaufbau',
+                fullDescription: `
+                    <h3>✅ Beschreibung:</h3>
+                    <p>Der 4-Day Split richtet sich an ambitionierte Trainierende mit dem Ziel des maximalen Muskelaufbaus. Die Einheiten folgen einem Upper/Lower/Push/Pull-Split, einer Kombination zweier effektiver Systeme. Durch die hohe Frequenz und gezielte Muskelbelastung kann ein hoher Trainingsreiz gesetzt werden – optimal für Fortgeschrittene oder Profis.</p>
+                    
+                    <h3>📌 Enthaltene Leistungen:</h3>
+                    <ul>
+                        <li>4 Trainingseinheiten pro Woche: Höheres Trainingsvolumen für besseren Muskelreiz.</li>
+                        <li>Upper/Lower/Push/Pull Split: Moderne Trainingsstruktur für maximale Effizienz.</li>
+                        <li>Individueller 12-Wochen-Plan: Maßgeschneidert auf dein Ziel (z. B. Muskelaufbau, Definition).</li>
+                        <li>Persönliche Betreuung: Intensive Begleitung deines Trainingsfortschritts.</li>
+                        <li>Ernährungsplan: Detaillierter Plan mit Makronährstoffen und Mahlzeitenvorschlägen.</li>
+                        <li>Progressions-Tracking: Verfolge deine Fortschritte und bleib motiviert.</li>
+                    </ul>
+                    
+                    <h3>🎯 Zielgruppe:</h3>
+                    <ul>
+                        <li>Fortgeschrittene bis sehr erfahrene Trainierende</li>
+                        <li>Personen mit mindestens 4 Tagen Zeit pro Woche</li>
+                        <li>Ziel: Muskelaufbau, Definition oder Performance</li>
+                    </ul>
+                `
+            }
+        };
+
+        function showDetails(plan) {
+            const d = planDetails[plan];
+            document.getElementById('modalBody').innerHTML = `
+                <h3>${d.title}</h3>
+                <div class="price">${d.price}</div>
+                <div class="full-description">
+                    ${d.fullDescription}
+                </div>
+            `;
+            document.getElementById('detailModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // Smooth Scroll nur für Navigation
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // FAQ Toggle Funktion
+        document.addEventListener('DOMContentLoaded', function() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                
+                question.addEventListener('click', () => {
+                    item.classList.toggle('active');
+                    
+                    // Ändere das + zu einem x wenn aktiv
+                    const toggle = item.querySelector('.faq-toggle');
+                    toggle.textContent = item.classList.contains('active') ? '×' : '+';
+                });
+                        });
+            
+            // 1RM-Rechner Funktionalität
+            const calculate1RMBtn = document.getElementById('calculate-1rm');
+            const weightLiftedInput = document.getElementById('weight-lifted');
+            const repsInput = document.getElementById('reps');
+            const exerciseSelect = document.getElementById('exercise');
+            const rmResult = document.getElementById('rm-result');
+            const rmValue = document.getElementById('rm-value');
+            const rm90 = document.getElementById('rm-90');
+            const rm85 = document.getElementById('rm-85');
+            const rm75 = document.getElementById('rm-75');
+            const rm65 = document.getElementById('rm-65');
+            
+            calculate1RMBtn.addEventListener('click', function() {
+                const weight = parseFloat(weightLiftedInput.value);
+                const reps = parseInt(repsInput.value);
+                const exercise = exerciseSelect.value;
+                
+                if (isNaN(weight) || isNaN(reps) || weight <= 0 || reps <= 0) {
+                    alert('Bitte gib gültige Werte für Gewicht und Wiederholungen ein.');
+                    return;
+                }
+                
+                // Brzycki Formel für 1RM Berechnung: 1RM = Gewicht × (36 / (37 - Wiederholungen))
+                const oneRM = weight * (36 / (37 - Math.min(reps, 36)));
+                rmValue.textContent = Math.round(oneRM * 10) / 10;
+                
+                // Prozentsätze berechnen
+                rm90.textContent = Math.round(oneRM * 0.9 * 10) / 10;
+                rm85.textContent = Math.round(oneRM * 0.85 * 10) / 10;
+                rm75.textContent = Math.round(oneRM * 0.75 * 10) / 10;
+                rm65.textContent = Math.round(oneRM * 0.65 * 10) / 10;
+                
+                // Übungsspezifische Empfehlungen könnten hier hinzugefügt werden
+                
+                rmResult.classList.add('active');
+            });
+            
+            // Quiz Funktionalität
+            const quizSubmitBtn = document.getElementById('quiz-submit');
+            const quizResult = document.getElementById('quiz-result');
+            const recommendedPlan = document.getElementById('recommended-plan');
+            const planDescription = document.getElementById('plan-description');
+            const planLink = document.getElementById('plan-link');
+            
+            quizSubmitBtn.addEventListener('click', function() {
+                // Werte aus dem Formular holen
+                const experience = document.querySelector('input[name="experience"]:checked');
+                const days = document.querySelector('input[name="days"]:checked');
+                const goal = document.querySelector('input[name="goal"]:checked');
+                
+                if (!experience || !days || !goal) {
+                    alert('Bitte beantworte alle Fragen, um eine Empfehlung zu erhalten.');
+                    return;
+                }
+                
+                // Logik für die Planempfehlung
+                let plan = '';
+                let description = '';
+                let linkTarget = '';
+                
+                // Einfache Entscheidungslogik basierend auf den Antworten
+                if (days.value === '2') {
+                    plan = '2-Day Split';
+                    linkTarget = '#2day';
+                    
+                    if (experience.value === 'beginner') {
+                        description = 'Der 2-Day Split ist ideal für Anfänger und bietet dir einen optimalen Einstieg ins Krafttraining mit Fokus auf Ganzkörperübungen.';
+                    } else {
+                        description = 'Der 2-Day Split ermöglicht dir effizientes Training trotz begrenzter Zeit und ist auf deine Erfahrung angepasst.';
+                    }
+                } else if (days.value === '3') {
+                    plan = '3-Day Split';
+                    linkTarget = '#3day';
+                    
+                    if (goal.value === 'strength') {
+                        description = 'Der 3-Day Split mit Push/Pull/Legs-Aufteilung ist optimal für deinen Fokus auf Kraftaufbau und bietet genügend Erholungszeit.';
+                    } else {
+                        description = 'Mit dem 3-Day Split kannst du gezielt an deinen Zielen arbeiten und erhältst eine ausgewogene Balance zwischen Training und Regeneration.';
+                    }
+                } else {
+                    plan = '4-Day Split';
+                    linkTarget = '#4day';
+                    
+                    if (goal.value === 'muscle') {
+                        description = 'Der 4-Day Split ist ideal für Muskelaufbau und ermöglicht dir, jede Muskelgruppe intensiv zu trainieren.';
+                    } else if (goal.value === 'fat') {
+                        description = 'Mit dem 4-Day Split kannst du durch höhere Trainingsfrequenz mehr Kalorien verbrennen und gleichzeitig Muskelmasse erhalten.';
+                    } else {
+                        description = 'Der 4-Day Split bietet dir maximale Flexibilität und ist ideal für fortgeschrittene Trainierende mit spezifischen Zielen.';
+                    }
+                }
+                
+                // Ergebnis anzeigen
+                recommendedPlan.textContent = plan;
+                planDescription.textContent = description;
+                planLink.setAttribute('onclick', `showDetails('${linkTarget.substring(1)}'); return false;`);
+                planLink.href = linkTarget;
+                
+                quizResult.classList.add('active');
+            });
+        });
+        
+        // Scroll Animation für Sektionen
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('section');
+            
+            function checkVisibility() {
+                sections.forEach(section => {
+                    const sectionTop = section.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (sectionTop < windowHeight * 0.75) {
+                        section.classList.add('visible');
+                    }
+                });
+            }
+            
+            // Initial check
+            checkVisibility();
+            
+            // Check on scroll
+            window.addEventListener('scroll', checkVisibility);
+        });
+    </script>
+</body>
+</html>
